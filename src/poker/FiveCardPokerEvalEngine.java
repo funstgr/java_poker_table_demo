@@ -1,0 +1,546 @@
+/*
+ * Copyright (c) FiveCardPokerEvalEngine.java 1.0 10/15/2012
+ * 
+ * Author: Gregory L. Funston 
+ */
+package poker;
+
+import java.util.Collections;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.TreeMap;
+import java.util.TreeSet;
+
+/**
+ * The FiveCardPokerEvalEngine class is used to evaluate and sort Poker Hands.
+ * It implements the EvaluatePokerHand interface.
+ * 
+ * @author Gregory L.Funston
+ * @version 1.0
+ */
+public class FiveCardPokerEvalEngine implements EvaluatePokerHand {
+
+	public FiveCardPokerEvalEngine() {
+	}
+
+	/**
+	 * Orders the cards in the hand for display or testing.
+	 * 
+	 * @param hand
+	 *            - The poker hand to be ordered(sorted).
+	 * 
+	 * @return The List<Card> which holds a high to low ordered hand. The hand
+	 *         is ordered high to low by its highest value poker hand order. A
+	 *         straight flush is 5 different cards so it is order from high to
+	 *         low. A hand with like cards will be ordered by the highes number
+	 *         of like cards from left to right.
+	 */
+	@Override
+	public List<Card> getOrderedHand(Hand hand) {
+
+		Map<CardValue, Integer> handMap = likeCardEvaluator(hand.getHand());
+		if (hand.getHandValue() == null) {
+			hand = setHandValue(hand, handMap);
+		}
+
+		return orderCardsByQuantityAndRank(handMap, hand);
+	}
+
+	/**
+	 * Evaluates the cards in multiple hands for display or testing.
+	 * 
+	 * @param hands
+	 *            - The hands to be evaluated.
+	 * 
+	 * @return The List<Hand> which holds the hands to be evaluated.
+	 */
+	@Override
+	public List<Hand> handEvaluator(List<Hand> hands) {
+
+		Hand hand1 = hands.get(0);
+		Hand hand2 = hands.get(1);
+
+		if (hands.size() == 2) {
+			evaluateTwoHands(hand1, hand2);
+		}
+
+		return hands;
+	}
+
+	/**
+	 * Takes 2 hands and set's a Result value in each hand.
+	 * 
+	 * @param hand1
+	 *            - The 1st hand to compare.
+	 * @param hand2
+	 *            - The 2nd hand to compare.
+	 */
+	private void evaluateTwoHands(Hand hand1, Hand hand2) {
+		Result winner = null;
+
+		// create a Map to hold CardValue and number of Cards of each value.
+		Map<CardValue, Integer> hand1Map = likeCardEvaluator(hand1.getHand());
+		Map<CardValue, Integer> hand2Map = likeCardEvaluator(hand2.getHand());
+
+		// set the hand value for each hand
+		hand1 = setHandValue(hand1, hand1Map);
+		hand2 = setHandValue(hand2, hand2Map);
+
+		// determine which hand wins or losses or if it is a tie
+		if (hand1.getHandValue().cv > hand2.getHandValue().cv) {
+			hand1.setResult(Result.Hand1);
+			hand2.setResult(Result.Hand1);
+		} else if (hand2.getHandValue().cv > hand1.getHandValue().cv) {
+			hand1.setResult(Result.Hand2);
+			hand2.setResult(Result.Hand2);
+		} else {
+			winner = highCardEvaluator(winner, hand1, hand2, hand1Map, hand2Map);
+			setResult(hand1, hand2, winner);
+		}
+	}
+
+	/**
+	 * Takes the CardValues and quantities in the Map and the Cards in the Hand
+	 * formats the hand from left to right and high to low based on poker hands
+	 * and their values.
+	 * 
+	 * @param hand
+	 *            - The hand to be sorted.
+	 * @param orderedHandMap
+	 *            - The order Map to be used to help create the ordered list.
+	 * 
+	 * @return List<Card> of newly ordered cards.
+	 */
+	private List<Card> createOrderedListByQuantityAndRank(Hand hand,
+			Map<CardValue, Integer> orderedHandMap) {
+		List<Card> cards = hand.getHand();
+		List<Card> orderedHand = new LinkedList<Card>();
+
+		for (CardValue cv : orderedHandMap.keySet()) {
+			for (int i = 0; i < orderedHandMap.get(cv); i++) {
+				for (Card card : cards) {
+					if (cv == card.getCard()) {
+						int pos = cards.indexOf(card);
+						if (!orderedHand.contains(cards.get(pos))) {
+							orderedHand.add(cards.get(pos));
+						}
+					}
+				}
+			}
+		}
+		return orderedHand;
+	}
+
+	/**
+	 * Checks if all cards are the same suit.
+	 * 
+	 * @param hand
+	 *            - The hand to be evaluated.
+	 * 
+	 * @return boolean of whether this hand is a flush hand.
+	 */
+	private boolean isItFlush(Hand hand) {
+		boolean flush = false;
+
+		List<Card> cards = hand.getHand();
+		int clubs = 0;
+		int diamonds = 0;
+		int hearts = 0;
+		int spades = 0;
+
+		for (Card card : cards) {
+
+			Suit suit = card.getSuit();
+
+			switch (suit) {
+			case Clubs:
+				clubs++;
+				break;
+			case Diamonds:
+				diamonds++;
+				break;
+			case Hearts:
+				hearts++;
+				break;
+			case Spades:
+				spades++;
+				break;
+			}
+		}
+		if (clubs == 5 || diamonds == 5 || hearts == 5 || spades == 5) {
+			flush = true;
+		}
+
+		return flush;
+	}
+
+	// creates a unique set of ordered card values low to high
+	private Set<Integer> createOrderedSet(List<Card> cardlist) {
+
+		List<Card> cardList = cardlist;
+		Set<Integer> cardSet = new TreeSet<Integer>();
+
+		for (Card card : cardList) {
+			cardSet.add(card.getCard().cardValue());
+		}
+
+		return cardSet;
+	}
+
+	// checks for the type of poker hand and sets a hand value
+	public Hand setHandValue(Hand hand, Map<CardValue, Integer> handMap) {
+
+		// only 5 different cards can make these hands
+		if (handMap.size() == 5) {
+			boolean straight = straightChecker(hand);
+			boolean flush = isItFlush(hand);
+
+			if (straight && flush) {
+				hand.setHandValue(PokerHandValue.StraightFlush);
+			} else if (straight) {
+				hand.setHandValue(PokerHandValue.Straight);
+			} else if (flush) {
+				hand.setHandValue(PokerHandValue.Flush);
+			} else {
+				hand.setHandValue(PokerHandValue.HighCard);
+			}
+
+			// only 4 different types of cards can make these hands
+		} else if (handMap.size() == 4) {
+			hand.setHandValue(PokerHandValue.OnePair);
+
+			// only 3 different types of cards can make these hands
+		} else if (handMap.size() == 3) {
+			if (handMap.containsValue(3)) {
+				hand.setHandValue(PokerHandValue.ThreeOfA_KInd);
+			} else {
+				hand.setHandValue(PokerHandValue.TwoPair);
+			}
+
+			// only 2 different types of cards can make these hands
+		} else if (handMap.size() == 2) {
+			if (handMap.containsValue(4)) {
+				hand.setHandValue(PokerHandValue.FourOfA_Kind);
+			} else {
+				hand.setHandValue(PokerHandValue.FullHouse);
+			}
+		}
+
+		return hand;
+	}
+
+	/**
+	 * Breaks a tie if possible if both hands have the same PokerHandValue.
+	 * 
+	 * @param hand1Map
+	 *            - The CardValues and quantities of the 1st hand.
+	 * @param hand2Map
+	 *            - The CardValues and quantities of the 2nd hand.
+	 * @param hand1
+	 *            - The 1st hand to be evaluated.
+	 * @param hand2
+	 *            - The 2nd hand to be evaluated.
+	 * 
+	 * @return Result of whether one of these hands is the winner or a tie.
+	 */
+	private Result tryToBreakTheTie(Map<CardValue, Integer> hand1Map,
+			Map<CardValue, Integer> hand2Map, Hand hand1, Hand hand2) {
+
+		Result result = null;
+
+		if (hand1.getHandValue().handValue() == PokerHandValue.StraightFlush
+				.handValue()) {
+			result = highCardEvaluator(result, hand1, hand2, hand1Map, hand2Map);
+		} else if (hand1.getHandValue().handValue() == PokerHandValue.FourOfA_Kind
+				.handValue()) {
+			result = highCardEvaluator(result, hand1, hand2, hand1Map, hand2Map);
+		} else if (hand1.getHandValue().handValue() == PokerHandValue.FullHouse
+				.handValue()) {
+			result = highCardEvaluator(result, hand1, hand2, hand1Map, hand2Map);
+		} else if (hand1.getHandValue().handValue() == PokerHandValue.Flush
+				.handValue()) {
+			result = highCardEvaluator(result, hand1, hand2, hand1Map, hand2Map);
+		} else if (hand1.getHandValue().handValue() == PokerHandValue.Straight
+				.handValue()) {
+			result = highCardEvaluator(result, hand1, hand2, hand1Map, hand2Map);
+		} else if (hand1.getHandValue().handValue() == PokerHandValue.ThreeOfA_KInd
+				.handValue()) {
+			result = highCardEvaluator(result, hand1, hand2, hand1Map, hand2Map);
+		} else if (hand1.getHandValue().handValue() == PokerHandValue.TwoPair
+				.handValue()) {
+			result = highCardEvaluator(result, hand1, hand2, hand1Map, hand2Map);
+		} else if (hand1.getHandValue().handValue() == PokerHandValue.OnePair
+				.handValue()) {
+			result = highCardEvaluator(result, hand1, hand2, hand1Map, hand2Map);
+		} else if (hand1.getHandValue().handValue() == PokerHandValue.HighCard
+				.handValue()) {
+			result = highCardEvaluator(result, hand1, hand2, hand1Map, hand2Map);
+		}
+
+		return result;
+	}
+
+	/**
+	 * Checks if all cards are the same suit.
+	 * 
+	 * @param hand1
+	 *            - The 1st hand to be evaluated.
+	 * @param hand2
+	 *            - The 2nd hand to be evaluated.
+	 * @param hand1Map
+	 *            - The CardValues and quantities of the 1st hand.
+	 * @param hand2Map
+	 *            - The CardValues and quantities of the 2nd hand.
+	 * 
+	 * @return Result of whether one of these hands is the winner or a tie.
+	 */
+	private Result highCardEvaluator(Result result, Hand hand1, Hand hand2,
+			Map<CardValue, Integer> hand1Map, Map<CardValue, Integer> hand2Map) {
+
+		List<Integer> cards1 = new LinkedList<Integer>(
+				createOrderedSet(hand1.getHand()));
+		List<Integer> cards2 = new LinkedList<Integer>(
+				createOrderedSet(hand2.getHand()));
+
+		if (hand1.getHandValue() == PokerHandValue.StraightFlush
+				|| hand1.getHandValue() == PokerHandValue.Flush
+				|| hand1.getHandValue() == PokerHandValue.Straight
+				|| hand1.getHandValue() == PokerHandValue.HighCard) {
+			Collections.reverse(cards1);
+		} else {
+			List<Card> newOrderedList = new LinkedList<Card>();
+			newOrderedList = orderCardsByQuantityAndRank(hand1Map, hand1);
+
+			cards1.removeAll(cards1);
+
+			for (Card card : newOrderedList) {
+				cards1.add(card.getCard().cardValue());
+			}
+		}
+
+		if (hand2.getHandValue() == PokerHandValue.StraightFlush
+				|| hand2.getHandValue() == PokerHandValue.Flush
+				|| hand2.getHandValue() == PokerHandValue.Straight
+				|| hand2.getHandValue() == PokerHandValue.HighCard) {
+			Collections.reverse(cards2);
+		} else {
+			List<Card> newOrderedList = new LinkedList<Card>();
+			newOrderedList = orderCardsByQuantityAndRank(hand2Map, hand2);
+			cards2.removeAll(cards2);
+
+			for (Card card : newOrderedList) {
+				cards2.add(card.getCard().cardValue());
+			}
+
+		}
+
+		for (int i = 0; i < cards1.size(); i++) {
+
+			// only enter this block if result is null or Tie
+			if (result == null || result == Result.Tie) {
+				if (cards1.get(i) > cards2.get(i)) {
+					result = Result.Hand1;
+				} else if (cards1.get(i) < cards2.get(i)) {
+					result = Result.Hand2;
+				} else {
+					result = Result.Tie;
+				}
+			}
+		}
+
+		return result;
+	}
+
+	/**
+	 * Checks if the hand is a straight.
+	 * 
+	 * @param hand
+	 *            - The hand to check.
+	 * 
+	 * @return boolean result of whether the hand is a straight.
+	 */
+	private boolean straightChecker(Hand hand) {
+
+		Set<Integer> cardSet = createOrderedSet(hand.getHand());
+
+		boolean straight = false;
+		List<Integer> cards = null;
+
+		// only check for a straight if it's 5 unique cards
+		if (cardSet.size() == 5) {
+			cards = new LinkedList<Integer>(cardSet);
+
+			int cv1 = cards.get(0);
+			int cv2 = cards.get(1);
+			int cv3 = cards.get(2);
+			int cv4 = cards.get(3);
+			int cv5 = cards.get(4);
+
+			if (cv2 == (cv1 + 1) && cv3 == (cv2 + 1) && cv4 == (cv3 + 1)
+					&& cv5 == (cv4 + 1)) {
+				straight = true;
+			}
+		}
+
+		return straight;
+	}
+
+	/**
+	 * Orders Cards by Quantity and Rank
+	 * 
+	 * @param hand
+	 *            - The hand to be ordered.
+	 * @param handMap
+	 *            - a Map of CardValue(s) and quantities.
+	 * 
+	 * @return The List<Card> of cards that were ordered.
+	 */
+	private List<Card> orderCardsByQuantityAndRank(
+			Map<CardValue, Integer> handMap, Hand hand) {
+
+		Map<CardValue, Integer> orderedHandMap = new LinkedHashMap<CardValue, Integer>();
+		TreeMap<CardValue, Integer> handMapCopy = new TreeMap<CardValue, Integer>();
+
+		handMapCopy.putAll(handMap);
+		/**
+		 * Each of these PokerHandValue(s) are 5 different cards and can simply
+		 * be put in order.
+		 */
+		if (hand.getHandValue() == PokerHandValue.StraightFlush
+				|| hand.getHandValue() == PokerHandValue.Flush
+				|| hand.getHandValue() == PokerHandValue.Straight
+				|| hand.getHandValue() == PokerHandValue.HighCard) {
+
+			for (Card card : hand.getHand()) {
+				handMapCopy.put(card.getCard(), 1);
+			}
+
+			orderedHandMap = new LinkedHashMap<CardValue, Integer>(
+					handMapCopy.descendingMap());
+
+		} else {
+			// handMapCopy.get(cv) returns the quantity of this cardValue
+			for (CardValue cv : handMap.keySet()) {
+
+				/**
+				 * If the quantity is 1 there is no block to enter. So if the
+				 * quantity is 4 we add the card to the new map and remove it
+				 * from the old map and add the remaining card
+				 */
+				if (handMapCopy.get(cv) == 4) {
+					orderedHandMap.put(cv, handMapCopy.remove(cv));
+					orderedHandMap.putAll(handMapCopy.descendingMap());
+				}
+				/**
+				 * If the quantity is 3 we have 3 of a KInd or a Full House. If
+				 * it is a Full house we need to determine if the 3 cards or the
+				 * pair are first in order then make the new Map. Otherwise we
+				 * remove the 3 of a Kind and add the remaining cards.
+				 */
+				else if (handMapCopy.get(cv) == 3) {
+					/**
+					 * if fullhouse and pair is present:remove contents of list
+					 * then add new contents.
+					 */
+					if (orderedHandMap.size() == 1) {
+						orderedHandMap.clear();
+						orderedHandMap.put(cv, handMapCopy.remove(cv));
+					} else {
+						orderedHandMap.put(cv, handMapCopy.remove(cv));
+					}
+					orderedHandMap.putAll(handMapCopy.descendingMap());
+
+				}
+
+				/**
+				 * If the hand is 2 pair we need to order pairs from high pair
+				 * to low pair than add the final card. If it is one pair we
+				 * need to add the pair then the remaining cards in order. Do
+				 * not enter this block if it is a Full House. If it is a pair
+				 * we only enter this block once.
+				 */
+				else if (handMapCopy.get(cv) == 2
+						&& !orderedHandMap.containsValue(3)) {
+
+					orderedHandMap.put(cv, handMapCopy.get(cv));
+					// only enter this block if it is 2 pair
+					if (handMapCopy.size() == 3) {
+						for (CardValue omcv : orderedHandMap.keySet()) {
+
+							// If 2 pair a Map copy is required
+							Map<CardValue, Integer> orderedHandMapCopy = new LinkedHashMap<CardValue, Integer>(
+									orderedHandMap);
+
+							// used to order 2 pair hands
+							if (omcv.cardValue() < cv.cardValue()) {
+								Integer q = orderedHandMapCopy.remove(omcv);
+								orderedHandMapCopy.put(cv,
+										handMapCopy.remove(cv));
+								orderedHandMapCopy.put(omcv, q);
+								orderedHandMapCopy.putAll(handMapCopy
+										.descendingMap());
+							}
+							orderedHandMap = orderedHandMapCopy;
+						}
+					}
+
+					/**
+					 * If handMapCopy.size() equals 4 then it is a pair and
+					 * because we are here the orderedHandMap has the pair
+					 * inserted and only needs the remaining CardValues and
+					 * quantities.
+					 */
+					if (handMapCopy.size() == 4) {
+						handMapCopy.remove(cv);
+						orderedHandMap.putAll(handMapCopy.descendingMap());
+					}
+
+				}
+			}
+
+		}
+
+		List<Card> orderedHand = createOrderedListByQuantityAndRank(hand,
+				orderedHandMap);
+
+		return orderedHand;
+	}
+
+	/**
+	 * This method creates and returns a Map of CardValues and their quantities.
+	 * 
+	 * @param cardlist
+	 *            - The cards to sorted according to CardValue and Quantitiy.
+	 * 
+	 * @return The Map<CardValue, Integer> showing the CardValue(s) and the
+	 *         number or each CardValue in the hand.
+	 */
+	private Map<CardValue, Integer> likeCardEvaluator(List<Card> cardlist) {
+
+		List<Card> handList = cardlist;
+		Map<CardValue, Integer> cardMap = new TreeMap<CardValue, Integer>();
+
+		for (Card card : handList) {
+			CardValue cv = card.getCard();
+			Integer quantity = cardMap.get(cv);
+			if (!cardMap.containsKey(cv)) {
+				cardMap.put(cv, 1);
+			} else {
+				quantity = cardMap.get(cv) + 1;
+				cardMap.put(cv, quantity);
+			}
+		}
+
+		return cardMap;
+	}
+
+	// sets the Result value in each hand.
+	private void setResult(Hand hand1, Hand hand2, Result winner) {
+		hand1.setResult(winner);
+		hand2.setResult(winner);
+	}
+
+}

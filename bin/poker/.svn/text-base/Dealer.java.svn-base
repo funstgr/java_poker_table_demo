@@ -1,0 +1,73 @@
+/*
+ * Copyright (c) Dealer.java 1.0 12/09/2012
+ * 
+ * Author: Gregory L. Funston
+ */
+
+package poker;
+
+import java.util.Collections;
+import java.util.HashMap;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.TreeMap;
+
+/**
+ * The Dealer class is used to act as a dealer for the Table.
+ * 
+ * @author Gregory L.Funston
+ * @version 1.0
+ */
+
+public class Dealer {
+
+	/**
+	 * Used to hold a shuffled deck of cards.
+	 */
+	public HashMap<Integer, Card> shuffledDeck = new LinkedHashMap<Integer, Card>();
+
+	public Dealer() {
+	}
+
+	/**
+	 * Shuffles a brand new deck of Cards. It does 9 shuffles which provides a
+	 * nice shuffled deck.
+	 */
+	public void shuffleFullDeckOfCards() {
+
+		// used to hold a new unshuffled Deck of cards
+		TreeMap<Integer, Card> deck = new TreeMap<Integer, Card>();
+		deck = new Deck().getDeck();
+
+		List<Integer> newDeckOfCards = new LinkedList<Integer>(deck.keySet());
+
+		// shuffle the new deck of cards index
+		Collections.shuffle(newDeckOfCards);
+		Collections.shuffle(newDeckOfCards);
+		Collections.shuffle(newDeckOfCards);
+		Collections.shuffle(newDeckOfCards);
+		Collections.shuffle(newDeckOfCards);
+		Collections.shuffle(newDeckOfCards);
+		Collections.shuffle(newDeckOfCards);
+		Collections.shuffle(newDeckOfCards);
+		Collections.shuffle(newDeckOfCards);
+
+		// create the shuffled deck map
+		int cardPosition = 0;
+		for (Integer deckcard : newDeckOfCards) {
+			shuffledDeck.put(cardPosition, deck.get(deckcard));
+			cardPosition++;
+		}
+	}
+
+	/**
+	 * A getter which returns the shuffled deck of cards HashMap
+	 * 
+	 * @return HashMap<Integer, Card> and integer based index of the shuffled
+	 *         deck values 0 to 51 with Card values.
+	 */
+	public HashMap<Integer, Card> getShuffledDeck() {
+		return shuffledDeck;
+	}
+}

@@ -1,0 +1,21 @@
+/*
+ * Copyright (c) EvaluateCardHand.java 1.0 12/09/2012
+ * 
+ * Author: Gregory L. Funston  
+ */
+package poker;
+
+import java.util.List;
+
+/**
+ * An interface implemented by classes to evaluate Card Hands.
+ * 
+ * @author Gregory Funston
+ * @version 1.0
+ */
+public interface EvaluateCardHand {
+
+	public List<Hand> handEvaluator(List<Hand> hands);
+
+	public List<Card> getOrderedHand(Hand hand);
+}

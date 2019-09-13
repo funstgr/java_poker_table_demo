@@ -1,0 +1,145 @@
+/*
+ * Copyright (c) StressTest.java 1.0 12/09/2012
+ * 
+ * Author: Gregory L. Funston
+ */
+
+package test;
+
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import poker.Card;
+import poker.FiveCardPokerDealer;
+import poker.FiveCardPokerEvalEngine;
+import poker.Hand;
+import poker.Result;
+import poker.Table;
+
+/**
+ * The StressTest class is an extension of TestCase and is part of the JUnit
+ * test framework. This class stresses the application and provides 10,000
+ * iterations of the application dealing a 2 person hand and evaluating it. The
+ * results are printed to console and can be scrolled through using the Find
+ * feature of the IDE for fast development testing.
+ * 
+ * @author Gregory L.Funston
+ * @version 1.0
+ */
+public class StressTest extends TestCase {
+
+	// used to evaluate and sort poker hands
+	private static FiveCardPokerEvalEngine pokerEvalEngine = new FiveCardPokerEvalEngine();
+
+	public void testStress() {
+		Map<Result, Integer> resultMap = new HashMap<Result, Integer>();
+
+		resultMap.put(Result.Hand1, 0);
+		resultMap.put(Result.Hand2, 0);
+		resultMap.put(Result.Tie, 0);
+
+		for (int i = 0; i < 10000; i++) {
+
+			System.out.println("Deal #" + (i + 1));
+			FiveCardPokerDealer dealer = new FiveCardPokerDealer();
+			Table table = dealer.dealHand(2);
+
+			Hand hand1 = table.getPlayer1().getHand();
+
+			// List<Card> cards1 = new LinkedList<Card>();
+			//
+			// cards1.add(new Card(Suit.Spades, CardValue.Six));
+			// cards1.add(new Card(Suit.Spades, CardValue.Ace));
+			// cards1.add(new Card(Suit.Diamonds, CardValue.Six));
+			// cards1.add(new Card(Suit.Hearts, CardValue.Ace));
+			// cards1.add(new Card(Suit.Clubs, CardValue.Six));
+			//
+			// hand1.setHand(cards1);
+
+			Hand hand2 = table.getPlayer2().getHand();
+
+			// List<Card> cards2 = new LinkedList<Card>();
+			// cards2.add(new Card(Suit.Spades, CardValue.Seven));
+			// cards2.add(new Card(Suit.Spades, CardValue.Jack));
+			// cards2.add(new Card(Suit.Clubs, CardValue.Seven));
+			// cards2.add(new Card(Suit.Diamonds, CardValue.Jack));
+			// cards2.add(new Card(Suit.Diamonds, CardValue.Jack));
+			//
+			// hand2.setHand(cards2);
+
+			List<Hand> hands = new LinkedList<>();
+			hands.add(hand1);
+			hands.add(hand2);
+
+			Result result = null;
+			pokerEvalEngine.handEvaluator(hands);
+			for (Hand hand : hands) {
+				if (hand.getResult() != null) {
+					if (hand.getResult() == Result.Hand1) {
+						result = Result.Hand1;
+					} else if (hand.getResult() == Result.Tie) {
+						result = Result.Tie;
+					} else {
+						result = Result.Hand2;
+					}
+				}
+			}
+			System.out.println(" ");
+			System.out.println("Hand1: ");
+			for (Card card : hand1.getHand()) {
+				System.out.print(card.getCard() + " of " + card.getSuit()
+						+ ", ");
+			}
+			System.out.println(" ");
+
+			List<Card> handa = pokerEvalEngine.getOrderedHand(hand1);
+			for (Card card : handa) {
+				System.out.print(card.getCard() + " of " + card.getSuit()
+						+ ", ");
+			}
+
+			System.out.println(" ");
+			System.out.println("Hand2: ");
+
+			for (Card card : hand2.getHand()) {
+				System.out.print(card.getCard() + " of " + card.getSuit()
+						+ ", ");
+			}
+
+			System.out.println(" ");
+
+			List<Card> handb = pokerEvalEngine.getOrderedHand(hand2);
+
+			for (Card card : handb) {
+				System.out.print(card.getCard() + " of " + card.getSuit()
+						+ ", ");
+			}
+
+			System.out.println(" ");
+
+			System.out.println(hand1.getHandValue());
+			System.out.println(hand2.getHandValue());
+			System.out.println(result.toString());
+
+			resultMap.put(result, (resultMap.get(result) + 1));
+
+			System.out.println(" ");
+			System.out.println(" ");
+
+		}
+
+		for (Result result1 : resultMap.keySet()) {
+			System.out.println("Result: " + result1 + " Quantity: "
+					+ resultMap.get(result1));
+		}
+	}
+
+	public static Test suite() {
+		return new TestSuite(StressTest.class);
+	}
+}

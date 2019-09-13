@@ -1,0 +1,32 @@
+/*
+ * Copyright (c) Result.java 1.0 10/15/2012
+ * 
+ * Author: Gregory L. Funston
+ */
+
+package poker;
+
+/**
+ * Enum class used to create ordinal and integer value results for Poker Hand
+ * evaluations.
+ * 
+ * @author Gregory L.Funston
+ * @version 1.0
+ */
+
+public enum Result {
+	Hand1(1), Hand2(2), Tie(3);
+
+	// used as an metric for integer based comparisons
+	int result;
+
+	Result(int result) {
+		this.result = result;
+	}
+
+	// returns the integer value of the enum
+	public int cardValue() {
+		return result;
+	}
+
+}

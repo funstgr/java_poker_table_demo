@@ -1,0 +1,97 @@
+/*
+ * Copyright (c) FiveCardPokerDealer.java 1.0 12/09/2012
+ * 
+ * Author: Gregory L. Funston
+ */
+
+package poker;
+
+import java.util.Iterator;
+import java.util.LinkedHashMap;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Map;
+
+/**
+ * The FiveCardPokerDealer class is an extension of the Dealer class and is used
+ * to act as a poker dealer for the Table.
+ * 
+ * @author Gregory L.Funston
+ * @version 1.0
+ */
+public class FiveCardPokerDealer extends Dealer {
+
+	// used to evaluate and sort poker hands
+	private static FiveCardPokerEvalEngine pokerEvalEngine = new FiveCardPokerEvalEngine();
+
+	public FiveCardPokerDealer() {
+		shuffleFullDeckOfCards();
+	}
+
+	/**
+	 * Deals the poker hands to the number of players at the table.
+	 * 
+	 * @param players
+	 *            - The number of players at the table.
+	 * 
+	 * @return The Table object which holds the poker Players.
+	 */
+	public Table dealHand(int players) {
+
+		Map<Integer, Player> playerMap = new LinkedHashMap<Integer, Player>();
+		Map<Integer, List<Card>> playerCardListMap = new LinkedHashMap<Integer, List<Card>>();
+
+		for (int i = 1; i <= players; i++) {
+			playerMap.put(i, new Player());
+			playerCardListMap.put(i, new LinkedList<Card>());
+		}
+
+		Iterator<Card> cardDeck = new LinkedList<Card>(shuffledDeck.values())
+				.iterator();
+
+		Table table = null;
+
+		if (playerMap.size() == 2) {
+			table = new Table(playerMap.get(1), playerMap.get(2));
+		}
+
+		table = dealTable(playerMap, playerCardListMap, cardDeck, table);
+
+		return table;
+	}
+
+	/**
+	 * Private method called by dealHand(). It deals the cards to the number of
+	 * players at the table.
+	 * 
+	 * @param playerMap
+	 *            - Map of Player objects
+	 * 
+	 * @param playerCardListMap
+	 *            - Map of List<Card> objects with the same index as the
+	 *            players.
+	 * @param cardList
+	 *            - the iterator of the shuffled deck of cards.
+	 * @param table
+	 *            - the Table being dealt.
+	 * 
+	 * @return The Table object which holds the poker Players.
+	 */
+	private Table dealTable(Map<Integer, Player> playerMap,
+			Map<Integer, List<Card>> playerCardListMap,
+			Iterator<Card> cardList, Table table) {
+
+		for (int i = 1; i < 6; i++) {
+			for (Integer player : playerCardListMap.keySet()) {
+				playerCardListMap.get(player).add(cardList.next());
+			}
+		}
+
+		for (Integer player : playerMap.keySet()) {
+			List<Card> cards = playerCardListMap.get(player);
+			playerMap.get(player).getHand().setHand(cards);
+		}
+
+		return table;
+	}
+}

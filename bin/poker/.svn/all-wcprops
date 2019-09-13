@@ -1,0 +1,89 @@
+K 25
+svn:wc:ra_dav:version-url
+V 39
+/repository/!svn/ver/24/Poker/src/poker
+END
+Deck.java
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/repository/!svn/ver/24/Poker/src/poker/Deck.java
+END
+PokerHandValue.java
+K 25
+svn:wc:ra_dav:version-url
+V 59
+/repository/!svn/ver/24/Poker/src/poker/PokerHandValue.java
+END
+Player.java
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/repository/!svn/ver/24/Poker/src/poker/Player.java
+END
+FiveCardPokerEvalEngine.java
+K 25
+svn:wc:ra_dav:version-url
+V 68
+/repository/!svn/ver/24/Poker/src/poker/FiveCardPokerEvalEngine.java
+END
+Dealer.java
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/repository/!svn/ver/24/Poker/src/poker/Dealer.java
+END
+EvaluateCardHand.java
+K 25
+svn:wc:ra_dav:version-url
+V 61
+/repository/!svn/ver/24/Poker/src/poker/EvaluateCardHand.java
+END
+Suit.java
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/repository/!svn/ver/24/Poker/src/poker/Suit.java
+END
+Card.java
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/repository/!svn/ver/24/Poker/src/poker/Card.java
+END
+Hand.java
+K 25
+svn:wc:ra_dav:version-url
+V 49
+/repository/!svn/ver/24/Poker/src/poker/Hand.java
+END
+CardValue.java
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/repository/!svn/ver/24/Poker/src/poker/CardValue.java
+END
+Result.java
+K 25
+svn:wc:ra_dav:version-url
+V 51
+/repository/!svn/ver/24/Poker/src/poker/Result.java
+END
+EvaluatePokerHand.java
+K 25
+svn:wc:ra_dav:version-url
+V 62
+/repository/!svn/ver/24/Poker/src/poker/EvaluatePokerHand.java
+END
+Table.java
+K 25
+svn:wc:ra_dav:version-url
+V 50
+/repository/!svn/ver/24/Poker/src/poker/Table.java
+END
+FiveCardPokerDealer.java
+K 25
+svn:wc:ra_dav:version-url
+V 64
+/repository/!svn/ver/24/Poker/src/poker/FiveCardPokerDealer.java
+END

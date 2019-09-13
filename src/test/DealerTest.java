@@ -1,0 +1,124 @@
+/*
+ * Copyright (c) DealerTest.java 1.0 10/15/2012
+ * 
+ * Author: Gregory L. Funston
+ */
+
+package test;
+
+import java.util.HashMap;
+import java.util.Map;
+import java.util.TreeMap;
+
+import junit.framework.Test;
+import junit.framework.TestCase;
+import junit.framework.TestSuite;
+import poker.Card;
+import poker.CardValue;
+import poker.Deck;
+import poker.FiveCardPokerDealer;
+import poker.Suit;
+import poker.Table;
+
+/**
+ * The DealerTest class is used to test the Dealer class and it's methods.
+ * 
+ * @author Gregory L.Funston
+ * @version 1.0
+ */
+
+public class DealerTest extends TestCase {
+
+	public void testDealer() {
+
+		Deck deck = new Deck();
+
+		TreeMap<Integer, Card> testDeck = new TreeMap<Integer, Card>();
+		testDeck = deck.getDeck();
+
+		FiveCardPokerDealer dealer = new FiveCardPokerDealer();
+
+		HashMap<Integer, Card> shuffledDeck = dealer.getShuffledDeck();
+
+		// confirm deck size
+		assertEquals("The deck is not 52 cards.", 52, shuffledDeck.size());
+
+		// confirm testDeck and shuffledDeck keyset is identical
+		assertEquals("The test deck and the shuffled deck are not the same.",
+				shuffledDeck.keySet(), testDeck.keySet());
+
+		// use to count number of cards in each suit
+		int clubs = 0;
+		int diamonds = 0;
+		int hearts = 0;
+		int spades = 0;
+
+		Map<CardValue, Integer> cardValueMap = new TreeMap<CardValue, Integer>();
+
+		// make a Map of Card Values and count the instances
+		for (Card card : shuffledDeck.values()) {
+
+			Suit suit = card.getSuit();
+			switch (suit) {
+			case Clubs:
+				clubs++;
+				break;
+			case Diamonds:
+				diamonds++;
+				break;
+			case Hearts:
+				hearts++;
+				break;
+			case Spades:
+				spades++;
+				break;
+			}
+
+			CardValue cardValue = card.getCard();
+			// count the number of instances OF Card Values
+			if (cardValueMap.containsKey(cardValue)) {
+				int i = cardValueMap.get(cardValue);
+				cardValueMap.put(cardValue, (i + 1));
+			} else {
+				cardValueMap.put(cardValue, 1);
+			}
+
+		}
+		// confirm there are 13 card value types
+		assertEquals("There are not 13 different card types", 13,
+				cardValueMap.size());
+
+		// confirm there are 4 of each card value
+		assertEquals("There are not 4 of each card type",
+				"{Two=4, Three=4, Four=4, Five=4, Six=4, Seven=4, Eight=4,"
+						+ " Nine=4, Ten=4, Jack=4, Queen=4, King=4, Ace=4}",
+				cardValueMap.toString());
+
+		// confirm there are 13 cards in each suit
+		assertEquals("There are not 13 clubs", 13, clubs);
+		assertEquals("There are not 13 diamonds", 13, diamonds);
+		assertEquals("There are not 13 hearts", 13, hearts);
+		assertEquals("There are not 13 spades", 13, spades);
+
+		Table table = dealer.dealHand(2);
+
+		// confirm table, player1, player2, hand1, hand2 are not null
+		assertNotNull("Table returned null", table);
+		assertNotNull("Player1 returned null", table.getPlayer1());
+		assertNotNull("Player2 returned null", table.getPlayer2());
+		assertNotNull("Hand1 returned null", table.getPlayer1().getHand());
+		assertNotNull("Hand2 returned null", table.getPlayer2().getHand());
+
+		// confirm 5 cards in each hand
+		assertEquals("There are not 5 cards in hand1.", 5, table.getPlayer1()
+				.getHand().getHand().size());
+		assertEquals("There are not 5 cards in hand2.", 5, table.getPlayer2()
+				.getHand().getHand().size());
+
+	}
+
+	public static Test suite() {
+		return new TestSuite(DealerTest.class);
+	}
+
+}

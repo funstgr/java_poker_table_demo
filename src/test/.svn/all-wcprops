@@ -1,0 +1,41 @@
+K 25
+svn:wc:ra_dav:version-url
+V 38
+/repository/!svn/ver/25/Poker/src/test
+END
+TestHand.java
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/repository/!svn/ver/25/Poker/src/test/TestHand.java
+END
+FiveCardPokerEvalEngineTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 71
+/repository/!svn/ver/25/Poker/src/test/FiveCardPokerEvalEngineTest.java
+END
+DealerTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/repository/!svn/ver/25/Poker/src/test/DealerTest.java
+END
+DeckTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 52
+/repository/!svn/ver/25/Poker/src/test/DeckTest.java
+END
+StressTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 54
+/repository/!svn/ver/25/Poker/src/test/StressTest.java
+END
+SuiteTest.java
+K 25
+svn:wc:ra_dav:version-url
+V 53
+/repository/!svn/ver/25/Poker/src/test/SuiteTest.java
+END

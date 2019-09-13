@@ -1,0 +1,17 @@
+/*
+ * Copyright (c) EvaluatePokerHand.java 1.0 12/09/2012
+ * 
+ * Author: Gregory L. Funston  
+ */
+
+package poker;
+
+/**
+ * An interface implemented by classes to evaluate Poker Card Hands.
+ * 
+ * @author Gregory Funston
+ * @version 1.0
+ */
+public interface EvaluatePokerHand extends EvaluateCardHand {
+
+}
